@@ -1,0 +1,50 @@
+---
+# Based on Google style, adjusted to match this codebase's conventions
+# (2-space indent, pointer bound to the declarator, attached braces,
+#  template decl on its own line, C++20 requires-clauses on their own line).
+BasedOnStyle: Google
+Language: Cpp
+Standard: c++20
+
+IndentWidth: 2
+ColumnLimit: 80
+UseTab: Never
+
+# `T *data_;` not `T* data_;`
+PointerAlignment: Left
+ReferenceAlignment: Left
+DerivePointerAlignment: false
+
+# `class Foo {` / `namespace {` — brace on the same line
+BreakBeforeBraces: Attach
+
+# `public:` sits flush with the class keyword, members indented under it
+AccessModifierOffset: -2
+
+# template <typename T>
+# struct default_deleter {
+AlwaysBreakTemplateDeclarations: Yes
+
+# Short one-liners like `{ delete data; }` stay on one line
+AllowShortFunctionsOnASingleLine: All
+AllowShortBlocksOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+
+# template <typename U>
+#   requires std::is_convertible_v<U *, pointer>
+#   constexpr unique_ptr(...)
+RequiresClausePosition: OwnLine
+IndentRequiresClause: true
+
+# constexpr typename std::add_lvalue_reference<element_type>::type
+# operator*() const noexcept { return *data_; }
+AlwaysBreakAfterReturnType: None
+BreakAfterReturnType: Automatic
+
+SpaceAfterTemplateKeyword: true
+SpaceBeforeParens: ControlStatements
+NamespaceIndentation: None
+FixNamespaceComments: true
+SortIncludes: CaseSensitive
+IncludeBlocks: Preserve
