@@ -1,0 +1,14 @@
+load("@gazelle//:def.bzl", "gazelle", "gazelle_binary")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
+gazelle_binary(
+    name = "gazelle_bin",
+    languages = [
+        "@gazelle_cc//language/cc",
+    ],
+)
+
+gazelle(
+    name = "gazelle",
+    gazelle = ":gazelle_bin",
+)
