@@ -9,6 +9,7 @@
 #include "metafunctions/identity_trait_mfns.hh"
 #include "metafunctions/type_modifying_mfns.hh"
 #include "metafunctions/type_trait_mfns.hh"
+#include "utility/exchange.hh"
 
 namespace mem {
 
@@ -76,7 +77,7 @@ public:
   [[nodiscard]] constexpr unique_ptr(unique_ptr&& other) noexcept;
 
   // Move assignment operator of identical type.
-  [[nodiscard]] constexpr unique_ptr& operator=(unique_ptr&& other) noexcept;
+  constexpr unique_ptr& operator=(unique_ptr&& other) noexcept;
 
   // Move constructor that enables type conversion. The moved-from type will
   // hold nullptr.
@@ -156,7 +157,7 @@ public:
 
 private:
   // The pointer to the allocated memory to manage.
-  pointer data_ = nullptr;
+  pointer data_;
 
   // The deleter functor to delete the allocated memory with. The
   // no_unique_address attribute allows for a stateless deleter to not have a
@@ -164,4 +165,153 @@ private:
   [[no_unique_address]] Deleter del_;
 };
 
-}  // namespace mem
+template <typename T, typename Deleter>
+constexpr unique_ptr<T, Deleter>::unique_ptr() noexcept
+    : data_(nullptr), del_() {}
+
+template <typename T, typename Deleter>
+constexpr unique_ptr<T, Deleter>::unique_ptr(std::nullptr_t) noexcept
+    : data_(nullptr), del_() {}
+
+template <typename T, typename Deleter>
+constexpr unique_ptr<T, Deleter>::unique_ptr(pointer data) noexcept
+    : data_(data), del_() {}
+
+template <typename T, typename Deleter>
+constexpr unique_ptr<T, Deleter>::unique_ptr(unique_ptr&& other) noexcept
+    : data_(util::exchange(other.data_, nullptr)),
+      del_(util::exchange(other.del_, Deleter{})) {}
+
+template <typename T, typename Deleter>
+constexpr auto unique_ptr<T, Deleter>::operator=(unique_ptr&& other) noexcept
+    -> unique_ptr& {
+  if (this == &other) {
+    return *this;
+  }
+
+  if (data_ != nullptr) {
+    del_(data_);
+  }
+
+  data_ = other.data_;
+  del_ = util::move(other.del_);
+
+  other.data_ = nullptr;
+  other.del_ = del_();
+  return *this;
+}
+
+template <typename T, typename Deleter>
+template <typename U, typename OtherDeleter>
+  requires(!metafunctions::is_array_v<U> &&
+           metafunctions::is_convertible_v<
+               typename unique_ptr<U, OtherDeleter>::pointer,
+               typename unique_ptr<T, Deleter>::pointer> &&
+           ((metafunctions::is_reference_v<OtherDeleter> &&
+             metafunctions::is_same_v<Deleter, OtherDeleter>) ||
+            (!metafunctions::is_reference_v<OtherDeleter> &&
+             metafunctions::is_convertible_v<OtherDeleter, Deleter>)))
+constexpr unique_ptr<T, Deleter>::unique_ptr(
+    unique_ptr<U, OtherDeleter>&& other) noexcept
+    : data_(util::exchange(other.data_, nullptr)),
+      del_(util::exchange(other.del_, OtherDeleter{})) {}
+
+template <typename T, typename Deleter>
+template <typename U, typename OtherDeleter>
+  requires(!metafunctions::is_array_v<U> &&
+           metafunctions::is_convertible_v<
+               typename unique_ptr<U, OtherDeleter>::pointer,
+               typename unique_ptr<T, Deleter>::pointer> &&
+           ((metafunctions::is_reference_v<OtherDeleter> &&
+             metafunctions::is_same_v<Deleter, OtherDeleter>) ||
+            (!metafunctions::is_reference_v<OtherDeleter> &&
+             metafunctions::is_convertible_v<OtherDeleter, Deleter>)))
+constexpr auto unique_ptr<T, Deleter>::operator=(
+    unique_ptr<U, OtherDeleter>&& other) noexcept -> unique_ptr& {
+  if (this == &other) {
+    return *this;
+  }
+
+  if (data_ != nullptr) {
+    del_(data_);
+  }
+
+  data_ = other.data_;
+  del_ = other.del_;
+
+  other.data_ = nullptr;
+  other.del_ = OtherDeleter{};
+  return *this;
+}
+
+template <typename T, typename Deleter>
+constexpr unique_ptr<T, Deleter>::~unique_ptr() noexcept {
+  if (data_ != nullptr) {
+    del_(data_);
+  }
+}
+
+template <typename T, typename Deleter>
+constexpr auto unique_ptr<T, Deleter>::release() noexcept -> pointer {
+  pointer data = data_;
+  data_ = nullptr;
+  return data;
+}
+
+template <typename T, typename Deleter>
+constexpr void unique_ptr<T, Deleter>::reset(pointer ptr) noexcept {
+  if (data_ != nullptr) {
+    del_(data_);
+  }
+
+  data_ = ptr;
+}
+
+template <typename T, typename Deleter>
+constexpr void unique_ptr<T, Deleter>::swap(unique_ptr& other) noexcept {
+  data_ = util::exchange(other.data_, data_);
+}
+
+template <typename T, typename Deleter>
+constexpr auto unique_ptr<T, Deleter>::get() const noexcept -> pointer {
+  return data_;
+}
+
+template <typename T, typename Deleter>
+constexpr auto unique_ptr<T, Deleter>::get_deleter() noexcept -> deleter_type& {
+  return del_;
+}
+
+template <typename T, typename Deleter>
+constexpr auto unique_ptr<T, Deleter>::get_deleter() const noexcept
+    -> const deleter_type& {
+  return del_;
+}
+
+template <typename T, typename Deleter>
+constexpr auto unique_ptr<T, Deleter>::operator*() const
+    noexcept(noexcept(*metafunctions::declval<pointer>())) ->
+    typename metafunctions::add_lvalue_reference_t<element_type> {
+  // If `data_` is `nullptr`, this is undefined behavior. This is on the
+  // programmer to check.
+  return *data_;
+}
+
+template <typename T, typename Deleter>
+constexpr unique_ptr<T, Deleter>::operator bool() const noexcept {
+  return data_ != nullptr;
+}
+
+template <typename T, typename Deleter>
+constexpr bool unique_ptr<T, Deleter>::operator==(
+    const unique_ptr& other) const noexcept {
+  return data_ == other.data_;
+}
+
+template <typename T, typename Deleter>
+constexpr bool unique_ptr<T, Deleter>::operator==(
+    std::nullptr_t) const noexcept {
+  return data_ == nullptr;
+}
+
+};  // namespace mem

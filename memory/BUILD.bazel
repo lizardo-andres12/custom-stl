@@ -5,4 +5,5 @@ cc_library(
     srcs = ["uptr.cc"],
     hdrs = ["unique_ptr.hh"],
     visibility = ["//visibility:public"],
+    deps = ["//metafunctions"],
 )

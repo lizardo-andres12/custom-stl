@@ -1,0 +1,17 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
+cc_library(
+    name = "utility",
+    hdrs = [
+        "exchange.hh",
+        "type_casting.hh",
+    ],
+    visibility = ["//visibility:public"],
+    deps = ["//metafunctions"],
+)
+
+cc_binary(
+    name = "main",
+    srcs = ["main.cc"],
+    deps = [":utility"],
+)
