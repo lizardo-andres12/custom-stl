@@ -1,3 +1,5 @@
+// This file contains utility procedural functions that update some input
+// reference's state based on arguments passed.
 #pragma once
 
 #include <type_traits>

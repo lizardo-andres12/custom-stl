@@ -1,3 +1,5 @@
+// This file contains utility functions that cast input values to different
+// types and value categories.
 #pragma once
 
 #include "metafunctions/type_trait_mfns.hh"
