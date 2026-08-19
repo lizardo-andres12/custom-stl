@@ -26,8 +26,7 @@ constexpr T&& forward(metafunctions::remove_reference_t<T>&& value) noexcept {
 
 // Casts the input lvalue to rvalue.
 template <typename T>
-[[nodiscard]] constexpr metafunctions::remove_reference_t<T>&& move(
-    T&& value) noexcept {
+constexpr metafunctions::remove_reference_t<T>&& move(T&& value) noexcept {
   return static_cast<metafunctions::remove_reference_t<T>&&>(value);
 }
 
