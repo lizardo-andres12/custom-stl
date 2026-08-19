@@ -10,7 +10,7 @@
 // static_assert fails, the compiler error identifies exactly which case
 // broke and why (see the message string).
 
-#include "type_trait_mfns.hh"
+#include "metafunctions/type_trait_mfns.hh"
 
 using namespace metafunctions;
 

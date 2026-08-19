@@ -1,0 +1,24 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+
+cc_binary(
+    name = "type_modifying_mfns",
+    srcs = ["type_modifying_mfns.cc"],
+    deps = [":metafunctions"],
+)
+
+cc_binary(
+    name = "type_trait_mfns",
+    srcs = ["type_trait_mfns.cc"],
+    deps = [":metafunctions"],
+)
+
+cc_library(
+    name = "metafunctions",
+    hdrs = [
+        "identity_trait_mfns.hh",
+        "type_modifying_mfns.hh",
+        "type_trait_mfns.hh",
+        "util_mfns.hh",
+    ],
+    visibility = ["//visibility:public"],
+)

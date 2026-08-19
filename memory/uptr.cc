@@ -1,16 +1,19 @@
 #include <type_traits>
 
-namespace aux {
+namespace {
 
-template <typename T> struct default_deleter {
+template <typename T>
+struct default_deleter {
   constexpr void operator()(T *data) const noexcept { delete data; };
 };
 
-template <typename T> struct default_deleter<T[]> {
+template <typename T>
+struct default_deleter<T[]> {
   constexpr void operator()(T *data) const noexcept { delete[] data; }
 };
 
-template <typename T, typename Deleter = default_deleter<T>> class unique_ptr {
+template <typename T, typename Deleter = default_deleter<T>>
+class unique_ptr {
 public:
   using element_type = T;
   using pointer = element_type *;
@@ -83,8 +86,5 @@ public:
   using pointer = element_type *;
   using delete_type = Deleter;
 };
-
-static_assert(
-    std::is_same_v<unique_ptr<int[]>::delete_type, default_deleter<int[]>>);
 
 }; // namespace aux

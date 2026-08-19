@@ -17,8 +17,8 @@
 // is_same metafunction from type_trait_mfns.hh, which was already verified
 // independently in type_trait_mfns_test.cc.
 
-#include "type_modifying_mfns.hh"
-#include "type_trait_mfns.hh"
+#include "metafunctions/type_modifying_mfns.hh"
+#include "metafunctions/type_trait_mfns.hh"
 
 using namespace metafunctions;
 

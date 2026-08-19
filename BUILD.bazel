@@ -1,5 +1,5 @@
 load("@gazelle//:def.bzl", "gazelle", "gazelle_binary")
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@hedron_compile_commands//:refresh_compile_commands.bzl", "refresh_compile_commands")
 
 gazelle_binary(
     name = "gazelle_bin",
@@ -11,4 +11,9 @@ gazelle_binary(
 gazelle(
     name = "gazelle",
     gazelle = ":gazelle_bin",
+)
+
+refresh_compile_commands(
+    name = "reload_lsp",
+    targets = ["//..."],
 )

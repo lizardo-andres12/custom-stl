@@ -8,3 +8,13 @@ bazel_dep(name = "rules_cc", version = "0.2.22")
 
 bazel_dep(name = "gazelle", version = "0.52.2")
 bazel_dep(name = "gazelle_cc", version = "0.6.0")
+
+bazel_dep(
+  name = "hedron_compile_commands",
+  dev_dependency = True,
+)
+git_override(
+  module_name = "hedron_compile_commands",
+  remote = "https://github.com/helly25/bazel-compile-commands-extractor.git",
+  commit = "868c433f823d2d4eb7ce68198cd9d38bf75d61ae",
+)

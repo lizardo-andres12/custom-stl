@@ -6,10 +6,9 @@
 
 #include <cstddef>
 
-#include "identity_trait_mfns.hh"
-#include "type_modifying_mfns.hh"
-#include "type_trait_mfns.hh"
-#include "util.hh"
+#include "metafunctions/identity_trait_mfns.hh"
+#include "metafunctions/type_modifying_mfns.hh"
+#include "metafunctions/type_trait_mfns.hh"
 
 namespace mem {
 
@@ -138,7 +137,7 @@ public:
   // dereferenced is noexcept dereferencable.
   [[nodiscard]] constexpr
       typename metafunctions::add_lvalue_reference_t<element_type>
-      operator*() const noexcept(noexcept(*util::declval<pointer>()));
+      operator*() const noexcept(noexcept(*metafunctions::declval<pointer>()));
 
   // Returns the underlying pointer owned by the unique pointer object. This
   // functions the same as `.get()`.

@@ -4,8 +4,8 @@
 
 #include <cstddef>
 
-#include "identity_trait_mfns.hh"
-#include "util.hh"
+#include "metafunctions/identity_trait_mfns.hh"
+#include "metafunctions/util_mfns.hh"
 
 namespace metafunctions {
 
@@ -152,7 +152,7 @@ private:
   static void helper(T) noexcept;
 
   template <typename F, typename T>
-  static auto test(int) -> decltype(helper<T>(util::declval<F>()), true_type{});
+  static auto test(int) -> decltype(helper<T>(declval<F>()), true_type{});
 
   template <typename F, typename T>
   static auto test(...) -> false_type;

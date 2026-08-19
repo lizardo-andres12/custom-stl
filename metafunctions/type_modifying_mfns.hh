@@ -2,7 +2,7 @@
 // invariants at compile time.
 #pragma once
 
-#include "identity_trait_mfns.hh"
+#include "metafunctions/identity_trait_mfns.hh"
 
 namespace metafunctions {
 
