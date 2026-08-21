@@ -20,12 +20,23 @@ struct default_deleter {
   using element_type = T;
   using pointer = element_type*;
 
+  // Default constructor explicitly defined.
+  constexpr default_deleter() noexcept = default;
+
+  // Convertible copy constructor that asserts underlying pointer types are
+  // convertible.
+  template <typename U>
+    requires metafunctions::is_convertible_v<U*, T*>
+  constexpr default_deleter(const default_deleter<U>&) noexcept {}
+
+  // Calls `delete` on the input pointer.
   constexpr void operator()(T* data) const noexcept { delete data; }
 };
 
 // A default_deleter specialization for pointers to array types.
 template <typename T>
 struct default_deleter<T[]> {
+  // Calls `delete[]` on the input pointer.
   constexpr void operator()(T* data) const noexcept { delete[] data; }
 };
 
@@ -179,8 +190,8 @@ constexpr unique_ptr<T, Deleter>::unique_ptr(pointer data) noexcept
 
 template <typename T, typename Deleter>
 constexpr unique_ptr<T, Deleter>::unique_ptr(unique_ptr&& other) noexcept
-    : data_(util::exchange(other.data_, nullptr)),
-      del_(util::exchange(other.del_, Deleter{})) {}
+    : data_(other.release()),
+      del_(util::forward<Deleter>(other.get_deleter())) {}
 
 template <typename T, typename Deleter>
 constexpr auto unique_ptr<T, Deleter>::operator=(unique_ptr&& other) noexcept
@@ -189,12 +200,8 @@ constexpr auto unique_ptr<T, Deleter>::operator=(unique_ptr&& other) noexcept
     return *this;
   }
 
-  del_(data_);
-  data_ = other.data_;
-  del_ = util::move(other.del_);
-
-  other.data_ = nullptr;
-  other.del_ = del_();
+  reset(other.release());
+  del_ = util::forward<Deleter>(other.get_deleter());
   return *this;
 }
 
@@ -210,8 +217,8 @@ template <typename U, typename OtherDeleter>
              metafunctions::is_convertible_v<OtherDeleter, Deleter>)))
 constexpr unique_ptr<T, Deleter>::unique_ptr(
     unique_ptr<U, OtherDeleter>&& other) noexcept
-    : data_(util::exchange(other.data_, nullptr)),
-      del_(util::exchange(other.del_, OtherDeleter{})) {}
+    : data_(other.release()),
+      del_(util::forward<OtherDeleter>(other.get_deleter())) {}
 
 template <typename T, typename Deleter>
 template <typename U, typename OtherDeleter>
@@ -225,16 +232,10 @@ template <typename U, typename OtherDeleter>
              metafunctions::is_convertible_v<OtherDeleter, Deleter>)))
 constexpr auto unique_ptr<T, Deleter>::operator=(
     unique_ptr<U, OtherDeleter>&& other) noexcept -> unique_ptr& {
-  if (this == &other) {
-    return *this;
-  }
-
-  del_(data_);
-  data_ = other.data_;
-  del_ = other.del_;
-
-  other.data_ = nullptr;
-  other.del_ = OtherDeleter{};
+  // The two unique_ptr objects cannot be the same since they are not of the
+  // same template type.
+  reset(other.release());
+  del_ = util::forward<OtherDeleter>(other.get_deleter());
   return *this;
 }
 
