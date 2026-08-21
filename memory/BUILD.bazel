@@ -1,12 +1,17 @@
-load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 
 cc_library(
     name = "memory",
-    srcs = ["uptr.cc"],
     hdrs = ["unique_ptr.hh"],
     visibility = ["//visibility:public"],
     deps = [
         "//metafunctions",
         "//utility",
     ],
+)
+
+cc_binary(
+    name = "main",
+    srcs = ["main.cpp"],
+    deps = [":memory"],
 )
