@@ -189,10 +189,7 @@ constexpr auto unique_ptr<T, Deleter>::operator=(unique_ptr&& other) noexcept
     return *this;
   }
 
-  if (data_ != nullptr) {
-    del_(data_);
-  }
-
+  del_(data_);
   data_ = other.data_;
   del_ = util::move(other.del_);
 
@@ -232,10 +229,7 @@ constexpr auto unique_ptr<T, Deleter>::operator=(
     return *this;
   }
 
-  if (data_ != nullptr) {
-    del_(data_);
-  }
-
+  del_(data_);
   data_ = other.data_;
   del_ = other.del_;
 
@@ -246,9 +240,7 @@ constexpr auto unique_ptr<T, Deleter>::operator=(
 
 template <typename T, typename Deleter>
 constexpr unique_ptr<T, Deleter>::~unique_ptr() noexcept {
-  if (data_ != nullptr) {
-    del_(data_);
-  }
+  del_(data_);
 }
 
 template <typename T, typename Deleter>
@@ -260,10 +252,7 @@ constexpr auto unique_ptr<T, Deleter>::release() noexcept -> pointer {
 
 template <typename T, typename Deleter>
 constexpr void unique_ptr<T, Deleter>::reset(pointer ptr) noexcept {
-  if (data_ != nullptr) {
-    del_(data_);
-  }
-
+  del_(data_);
   data_ = ptr;
 }
 
